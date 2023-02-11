@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using SpaWithAuth.Data;
 using SpaWithAuth.Factories;
 using SpaWithAuth.Models;
+using SpaWithAuth.Services;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,20 +21,18 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
-    .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>();
 
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
     {
-        options.IdentityResources.Add(new IdentityResource("roles", "Roles", new[] { JwtClaimTypes.Role, ClaimTypes.Role }));
-        options.IdentityResources.Add(new IdentityResource("custom", "Custom profile data", new[] { nameof(ApplicationUser.FullName) }));
-        options.Clients.ToList().ForEach(c =>
-        {
-            c.AllowedScopes.Add("roles");
-            c.AllowedScopes.Add("custom");
-        });
-    });
+        options.IdentityResources["openid"].UserClaims.Add("role");
+        options.ApiResources.Single().UserClaims.Add("role");
+        options.IdentityResources["profile"].UserClaims.Add(nameof(ApplicationUser.FullName));
+        options.ApiResources.Single().UserClaims.Add(nameof(ApplicationUser.FullName));
+    })
+    .AddProfileService<ProfileService>();
 
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
