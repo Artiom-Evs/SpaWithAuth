@@ -11,7 +11,8 @@ namespace SpaWithAuth.Data
         public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions)
             : base(options, operationalStoreOptions)
         {
-
+            Database.EnsureCreated();
+            Database.Migrate();
         }
     }
 }
