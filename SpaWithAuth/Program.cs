@@ -24,7 +24,12 @@ builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
     {
         options.IdentityResources.Add(new IdentityResource("roles", "Roles", new[] { JwtClaimTypes.Role, ClaimTypes.Role }));
-        options.Clients.ToList().ForEach(c => c.AllowedScopes.Add("roles"));
+        options.IdentityResources.Add(new IdentityResource("custom", "Custom profile data", new[] { nameof(ApplicationUser.FullName) }));
+        options.Clients.ToList().ForEach(c =>
+        {
+            c.AllowedScopes.Add("roles");
+            c.AllowedScopes.Add("custom");
+        });
     });
 
 builder.Services.AddAuthentication()
