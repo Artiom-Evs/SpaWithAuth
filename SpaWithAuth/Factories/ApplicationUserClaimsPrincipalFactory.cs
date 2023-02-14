@@ -5,13 +5,14 @@ using System.Security.Claims;
 
 namespace SpaWithAuth.Factories;
 
-public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser>
+public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>
 {
     public ApplicationUserClaimsPrincipalFactory(
         UserManager<ApplicationUser> userManager, 
-        IOptions<IdentityOptions> optionsAccessor) 
-        : base(userManager, optionsAccessor) { }
-
+        RoleManager<IdentityRole> roleManager, 
+        IOptions<IdentityOptions> options) 
+        : base(userManager, roleManager, options) { }
+    
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
     {
         var identity = await base.GenerateClaimsAsync(user);
